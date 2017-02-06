@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<form>
+   <h2>Add a Food</h2>
+   <input type="text" name="food">
+   <button>Add</button>
+   
+  <ol>
+     {% for x in range(1, n+1) %}
+        <li>
+        {% if x % 15 == 0 %}
+          Fizzbuzz
+        {% elif x % 5 == 0 %}
+          Buzz
+        {% else %}
+          {{ x }}
+       {% endif %}
+        </li>
+      {% endfor %}
+  </ol>
+   
+</form>
+
+{% endblock %}

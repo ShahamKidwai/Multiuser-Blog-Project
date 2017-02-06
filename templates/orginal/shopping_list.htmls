@@ -1,0 +1,9 @@
+<form>
+    <h2>Add a Food</h2>
+	<input type="text" name="food">
+	{%if items %}
+	   {% for item in items %}
+		  <input type="hidden" name="food" value="{{item}}">
+	<button>Add</button>
+
+</form>
