@@ -2,4 +2,11 @@
 
 {% block content %}
   {{post.render() | safe}}
+  <br>
+  <br>
+  {% for p in post.comments %}
+    {{p.comment}}
+	 <br>
+	 <br>
+  {% endfor %}
 {% endblock %}

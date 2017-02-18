@@ -4,11 +4,10 @@
 
   {% for p in posts %}
     {{ p.render() | safe }}
-    <br>
-	<div class = "post-links">
+	<div align = "right">
 	<a href = '/updatepost/{{p.key().id()}}'>Edit</a>
 	<a href = '/blog/delete/{{p.key().id()}}'>Delete</a>
-	<a href = '/comment'>comment</a>
+	<a href = '/comment/{{p.key().id()}}'>Post a Comment</a>
 	</div>
 	 <br>
 	 <br>
