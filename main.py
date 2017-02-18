@@ -164,7 +164,6 @@ class Signup(BlogHandler):
         raise NotImplementedError
 
 class Register(Signup):
-
      def done(self):
          u = User.by_name(self.username)
          if u:
@@ -216,24 +215,31 @@ class Post(db.Model):
           return render_str("post.html", p = self)
 
 
-class Comment(db.Model)
+class Comment(db.Model):
       comment = db.StringProperty(required = True)
       cAuthor = db.StringProperty(required = True)
       created = db.DateTimeProperty(auto_now_add = True)
-
+      post  = db.ReferenceProperty(Post, collection_name='comments')
 
 class newComment(BlogHandler):
-      def get(self):
+      def get(self, post_id):
           if not self.user:
              self.redirect('/login')
           else:
-               self.render("newcomment.html")
+               key = db.Key.from_path('Post', int(post_id), parent=blog_key())
+               post = db.get(key)
+               subject = post.subject
+               content = post.content
+               self.render("newcomment.html", subject = subject, content = content)
                
-      def post(self):
+      def post(self, post_id):
+          key = db.Key.from_path('Post', int(post_id), parent=blog_key())
+          post = db.get(key)
           comment = self.request.get('comment')
           if comment:
-             c = Comment(comment = comment, cAuthor = User.by_name(self.user.name).name, parent = blog_key())
+             c = Comment(comment = comment, cAuthor = User.by_name(self.user.name).name, post = post.key(), parent = blog_key())
              c.put()
+             self.redirect('/blog/%s' % str(post_id))
           else:
                 error = "please enter a comment"
                 self.render("newcomment.html", comment = comment, error = error)
@@ -326,7 +332,7 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/updatepost/([0-9]+)', updatePost),
                                ('/signup', Register),
                                ('/login', Login),
-                               ('/comment', newComment),
+                               ('/comment/([0-9]+)', newComment),
                                ('/logout', Logout),
                                ('/unit3/welcome', WelcomePage), 
                                ('/blog/newpost', NewPost),], debug = True)
