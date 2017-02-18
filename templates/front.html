@@ -4,7 +4,15 @@
 
   {% for p in posts %}
     {{ p.render() | safe }}
-    <br><br>
+    <br>
+	<div class = "post-links">
+	<a href = '/updatepost/{{p.key().id()}}'>Edit</a>
+	<a href = '/blog/delete/{{p.key().id()}}'>Delete</a>
+	<a href = '/comment'>comment</a>
+	</div>
+	 <br>
+	 <br>
+	
   {% endfor %}
 
 {% endblock %}
