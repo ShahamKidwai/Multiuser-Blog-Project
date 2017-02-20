@@ -5,7 +5,13 @@
   <br>
   <br>
   {% for p in post.comments %}
-    {{p.comment}}
+     {{p.comment}}
+	
+	   <div align = "right">
+	   <a href = '/blog/{{post.key().id()}}/updatecomment/{{p.key().id()}}'>Edit Comment</a>
+	   <a href = '/blog/{{post.key().id()}}/deletecomment/{{p.key().id()}}'>deleteComment</a>
+	   </div>
+    
 	 <br>
 	 <br>
   {% endfor %}
