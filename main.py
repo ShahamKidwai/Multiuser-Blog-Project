@@ -51,6 +51,7 @@ class BlogHandler(webapp2.RequestHandler):
          self.response.out.write(*a, **kw)
 
      def render_str(self, template, **params):
+         params['user'] = self.user
          return render_str(template, **params)
 
      def render(self, template, **kw):
@@ -244,6 +245,46 @@ class newComment(BlogHandler):
                 error = "please enter a comment"
                 self.render("newcomment.html", comment = comment, error = error)
 
+class UpdateComment(BlogHandler):
+    def get(self, post_id, comment_id):
+        post = Post.get_by_id( int(post_id), parent=blog_key() )
+        comment = Comment.get_by_id(int(comment_id), parent=blog_key() )
+        if not comment:
+           self.error(404)
+           return
+        if comment:
+            self.render("updatecomment.html", subject=post.subject, content=post.content, comment=comment.comment)
+            
+    def post(self, post_id, comment_id):
+        comment = Comment.get_by_id(int(comment_id), parent=blog_key())
+        if not comment:
+           self.error(404)
+           return
+        if comment.cAuthor == self.user.name:
+           comment.comment = self.request.get('comment')
+           comment.put()
+           self.redirect('/blog/%s' % str(post_id))
+        else:
+            self.redirect('/commenterror')
+
+class deleteComment(BlogHandler):
+      def get(self, post_id, comment_id):
+               post = Post.get_by_id(int(post_id), parent=blog_key())
+               comment = Comment.get_by_id( int(comment_id), parent=blog_key() )
+               if not comment:
+                  self.error(404)
+                  return
+               if comment:
+                  if (comment.cAuthor == self.user.name):
+                      comment.delete()
+                      self.redirect('/blog/%s' % str(post_id))
+                  else:
+                       self.redirect('/commenterror')
+
+class CommentError(BlogHandler):
+    def get(self):
+        self.write('You can only edit or delete comments you have created.')
+
 
 class NewPost(BlogHandler):
      def get(self):
@@ -253,9 +294,10 @@ class NewPost(BlogHandler):
               self.render('newpost.html')
 
      def post(self):
+         if not self.user:
+                self.redirect('/login')
          subject = self.request.get('subject')
          content = self.request.get('content')
-
          if subject and content:
             p = Post(subject=subject, content=content, author =User.by_name(self.user.name).name,  parent = blog_key())
             p.put()
@@ -286,11 +328,14 @@ class updatePost(BlogHandler):
           else:
                key = db.Key.from_path('Post', int(post_id), parent=blog_key())
                post = db.get(key)
+               if not post:
+                   self.error(404)
+                   return 
                if (post.author == self.user.name):
                    error = ""
                    self.render("updatepost.html", subject = post.subject, content = post.content, error = error)
                else:
-                    self.render("deletePostError.html")
+                   self.redirect('/editDeleteError') 
 
       def post(self, post_id):
           if not self.user:
@@ -301,6 +346,9 @@ class updatePost(BlogHandler):
                if subject and content:
                     key = db.Key.from_path('Post', int(post_id), parent=blog_key())
                     uPost = db.get(key)
+                    if not uPost:
+                       self.error(404)
+                       return
                     uPost.subject = subject
                     uPost.content = content
                     uPost.put()
@@ -317,11 +365,19 @@ class DeletePost(BlogHandler):
           else: 
                key = db.Key.from_path('Post', int(post_id), parent=blog_key())
                post = db.get(key)
+               if not post:
+                  self.error(404)
+                  return
                if (post.author == self.user.name):
                    post.delete()
                    self.render("deletepost.html")
                else: 
-                    self.render("deletepostError.html")
+                    self.redirect('/editDeleteError')
+
+                    
+class editDeleteError(BlogHandler):
+    def get(self):
+        self.write('You are not authorized to edit or delete this post.')
         
 
 
@@ -330,6 +386,10 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/delete/([0-9]+)', DeletePost),
                                ('/blog/([0-9]+)', PostPage),
                                ('/updatepost/([0-9]+)', updatePost),
+                               ('/blog/([0-9]+)/updatecomment/([0-9]+)', UpdateComment),
+                               ('/blog/([0-9]+)/deletecomment/([0-9]+)', deleteComment),
+                               ('/commenterror', CommentError),
+                               ('/editDeleteError', editDeleteError),
                                ('/signup', Register),
                                ('/login', Login),
                                ('/comment/([0-9]+)', newComment),
