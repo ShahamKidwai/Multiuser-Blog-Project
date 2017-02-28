@@ -7,6 +7,14 @@
 </head>
 
 <body>
+  {% if user %}
+   <div class = "user-links" align = "right">   
+   <h3>{{user.name}}</h3>
+   <h3><a href ='/logout'> Logout</a></h3>
+   </div>
+  {% else %} 
+   <div class = "logio-links" align = "right"><a href ='/login'> Login</a></div>
+  {% endif %}
   <a href="/blog" class="main-title">
     CS 253 Blog
   </a>
@@ -16,6 +24,5 @@
   {% endblock %}
   </div>
 </body>
-
 </html>
 

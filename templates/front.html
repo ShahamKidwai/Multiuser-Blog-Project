@@ -4,14 +4,21 @@
 
   {% for p in posts %}
     {{ p.render() | safe }}
-	<div align = "right">
-	<a href = '/updatepost/{{p.key().id()}}'>Edit</a>
-	<a href = '/blog/delete/{{p.key().id()}}'>Delete</a>
-	<a href = '/comment/{{p.key().id()}}'>Post a Comment</a>
+	<div class="links-container">
+     <span class="comment-cnt"><a href = '/blog/{{p.key().id()}}'>{{p.comments.count()}} comments</a></span>
+	 <span class = "likePost"><a href = '/blog/{{p.key().id()}}'>{{p.Likes.count()}} Likes</a></span>
+     <span class ="PostCmnt"><a href = '/comment/{{p.key().id()}}'>Post a Comment</a></span>
+	 <span class = "likePost"><a href = '/blog/{{p.key().id()}}/likes'>Like Post</a></span>
+	 <span class = "updPost"><a href = '/updatepost/{{p.key().id()}}'>UpdatePost </a></span>
+	 <span class = "delPost"><a href = '/blog/delete/{{p.key().id()}}'>DeletePost </a></span>
 	</div>
 	 <br>
 	 <br>
 	
   {% endfor %}
-
+  <br>
+  <br>
+  <div class = "hlink" align = "right"><a href = '/unit3/welcome'>Back to Home Page</a> </div>
+ 
+ 
 {% endblock %}

@@ -19,6 +19,8 @@
        <textarea name = "comment">{{comment}}</textarea>
      </label>
      <div class = "error"> {{error}}</div>
-     <input type = "submit">
+	 
+     <input type = "submit">	
+	 <a href='/blog/{{p.key().id()}}'><h3>Cancel</h3></a>	 
      </form>
-{% endblock %}	 
+{% endblock %}	

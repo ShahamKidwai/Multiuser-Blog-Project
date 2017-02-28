@@ -5,14 +5,17 @@
   <br>
   <br>
   {% for p in post.comments %}
-     {{p.comment}}
+     <div class="cmt-post">{{p.comment}}</div>
+	 <div class = "post-by"> <span class = "author"> by</span>{{p.cAuthor}}</div>
 	
 	   <div align = "right">
-	   <a href = '/blog/{{post.key().id()}}/updatecomment/{{p.key().id()}}'>Edit Comment</a>
-	   <a href = '/blog/{{post.key().id()}}/deletecomment/{{p.key().id()}}'>deleteComment</a>
+	    <span class = "editCmt"> <a href = '/blog/{{post.key().id()}}/updatecomment/{{p.key().id()}}'>Edit Comment</a></span>
+	    <span class = "delCmt"><a href = '/blog/{{post.key().id()}}/deletecomment/{{p.key().id()}}'>deleteComment</a></span>
 	   </div>
     
 	 <br>
 	 <br>
   {% endfor %}
+  <br>
+   <div class = "hpage" align = "right"><h3><a href = '/blog'>Back to Blog Page</a></h3>
 {% endblock %}
