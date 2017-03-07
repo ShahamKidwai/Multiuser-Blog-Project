@@ -1,16 +1,8 @@
 <!DOCTYPE html>
 
-<html>
-  <head>
-    <title>Login</title>
-    <style type="text/css">
-      .label {text-align: right}
-      .error {color: red}
-    </style>
-
-  </head>
-
-  <body>
+{% extends "loginbase.html" %}
+{% block content %}
+    <br>
     <h2>Login</h2>
     <form method="post">
       <table>
@@ -41,6 +33,4 @@
 	   <span>New User:</span>
 	   <span><a href ='/signup'>Create New Account</a></span> 
 	</form>
-  </body>
-
-</html>
+  {% endblock %}

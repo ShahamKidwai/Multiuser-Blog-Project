@@ -1,16 +1,7 @@
 <!DOCTYPE html>
 
-<html>
-  <head>
-    <title>Unit 2 Rot 13</title>
-    <style type="text/css">
-      .label {text-align: right}
-      .error {color: red}
-    </style>
-
-  </head>
-
-  <body>
+{% extends "loginbase.html" %}
+{% block content %}
     <h2>Signup</h2>
     <form method="post">
       <table>
@@ -68,6 +59,5 @@
 	<br>
 	<span>Already a Registered User: </span>
 	 <span><a href ='/login'>Click here to login</a></span>
-  </body>
+  {% endblock %}
 
-</html>

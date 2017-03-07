@@ -1,16 +1,9 @@
 <!DOCTYPE html>
-
-<html>
-  <head>
-    <title>Unit 2 Signup</title>
-  </head>
-
-  <body>
+{% extends "loginbase.html" %}
+{% block content %}
     <h2>Welcome, {{username}}!</h2>
-	<br>
 	<p><a href = '/blog/newpost'> Create a New Post</a>
 	<br>
 	<p><a href = '/blog'> Click here to view the blog</a></p>
 	<p><a href = '/logout'>Logout</a></p>
-	</body>
-</html>
+{% endblock %}
