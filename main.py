@@ -259,18 +259,6 @@ class Comment(db.Model):
         created = db.DateTimeProperty(auto_now_add=True)
         post = db.ReferenceProperty(Post, collection_name='comments')
 
-#   below classes handles the error that occurs when liking the posts
-
-
-class likeError(BlogHandler):
-        def get(self):
-            self.write('You can only like a post once.')
-
-
-class likeUserErr(BlogHandler):
-        def get(self):
-            self.write('You cannot like a post that you have created!!!')
-
 
 class LikePost(db.Model):
         postid = db.IntegerProperty(required=True)
@@ -291,7 +279,7 @@ class like(BlogHandler):
                 if(lAuthor == currentUser):
                     self.redirect('/likeUErr')
                 elif (currentUser in post.liked_by):
-                        self.redirect('/Lerror')
+                        self.render("likeposterror.html")
                 else:
                     post.liked_by.append(currentUser)
                     post.put()
@@ -311,10 +299,14 @@ class newComment(BlogHandler):
                     key = db.Key.from_path('Post', int(post_id),
                                            parent=blog_key())
                     post = db.get(key)
-                    subject = post.subject
-                    content = post.content
-                    self.render("newcomment.html", subject=subject,
-                                content=content)
+                    if not post:
+                        self.error(404)
+                        return
+                    else:
+                        subject = post.subject
+                        content = post.content
+                        self.render("newcomment.html", subject=subject,
+                                    content=content)
 
         def post(self, post_id):
             if not self.user:
@@ -323,17 +315,21 @@ class newComment(BlogHandler):
                     key = db.Key.from_path('Post', int(post_id),
                                            parent=blog_key())
                     post = db.get(key)
-                    comment = self.request.get('comment')
-                    if comment:
-                        c = Comment(comment=comment,
-                                    cAuthor=User.by_name(self.user.name).name,
-                                    post=post.key(), parent=blog_key())
-                        c.put()
-                        self.redirect('/blog/%s' % str(post_id))
+                    if not post:
+                        self.error(404)
+                        return
                     else:
-                            error = "please enter a comment"
-                            self.render("newcomment.html", comment=comment,
-                                        error=error)
+                        comment = self.request.get('comment')
+                        if comment:
+                            U = User.by_name(self.user.name)
+                            c = Comment(comment=comment, cAuthor=U.name,
+                                        post=key, parent=blog_key())
+                            c.put()
+                            self.redirect('/blog/%s' % str(post_id))
+                        else:
+                                error = "please enter a comment"
+                                self.render("newcomment.html", comment=comment,
+                                            error=error)
 
 # below class handles the comment updates by users
 
@@ -344,6 +340,9 @@ class UpdateComment(BlogHandler):
             return self.redirect('/login')
         else:
             post = Post.get_by_id(int(post_id), parent=blog_key())
+            if not post:
+                self.error(404)
+                return
             comment = Comment.get_by_id(int(comment_id), parent=blog_key())
             if not comment:
                 self.error(404)
@@ -354,7 +353,7 @@ class UpdateComment(BlogHandler):
                             content=post.content, error=error,
                             comment=comment.comment, p=post)
             else:
-                    self.redirect('/commenterror')
+                    self.render("commentError.html")
 
     def post(self, post_id, comment_id):
         if not self.user:
@@ -363,6 +362,9 @@ class UpdateComment(BlogHandler):
             ucomment = self.request.get('comment')
             if ucomment:
                 post = Post.get_by_id(int(post_id), parent=blog_key())
+                if not post:
+                    self.error(404)
+                    return
                 comment = Comment.get_by_id(int(comment_id), parent=blog_key())
                 if not comment:
                     self.error(404)
@@ -372,7 +374,7 @@ class UpdateComment(BlogHandler):
                         comment.put()
                         self.redirect('/blog/%s' % str(post_id))
                 else:
-                        self.redirect('/commenterror')
+                        self.render("commentError.html")
             else:
                         post = Post.get_by_id(int(post_id), parent=blog_key())
                         error = "please enter the comment!"
@@ -395,7 +397,7 @@ class deleteComment(BlogHandler):
                         comment.delete()
                         self.redirect('/blog/%s' % str(post_id))
                 else:
-                    self.redirect('/commenterror')
+                    self.render("commentError.html")
 
 # below class handles the error when posting the comment
 
@@ -468,7 +470,7 @@ class updatePost(BlogHandler):
                     self.render("updatepost.html", subject=post.subject,
                                 content=post.content, error=error)
                 else:
-                    self.redirect('/editDeleteError')
+                    self.render("deletepostError.html")
 
         def post(self, post_id):
             if not self.user:
@@ -483,14 +485,17 @@ class updatePost(BlogHandler):
                     if not uPost:
                         self.error(404)
                         return
-                    uPost.subject = subject
-                    uPost.content = content
-                    uPost.put()
-                    self.redirect('/blog/%s' % str(uPost.key().id()))
+                    if (upost.author == self.user.name):
+                        uPost.subject = subject
+                        uPost.content = content
+                        uPost.put()
+                        self.redirect('/blog/%s' % str(uPost.key().id()))
+                    else:
+                        self.render("deletepostError.html")
                 else:
-                    error = "subject and content, please!"
-                    self.render("newpost.html", subject=subject,
-                                content=content, error=error)
+                        error = "subject and content, please!"
+                        self.render("newpost.html", subject=subject,
+                                    content=content, error=error)
 # below class handles the deleting of posts by users
 
 
@@ -508,7 +513,7 @@ class DeletePost(BlogHandler):
                 post.delete()
                 self.render("deletepost.html")
             else:
-                self.redirect('/editDeleteError')
+                self.render("deletepostError.html")
 
 # below class handles the error that occurs when updating or deleting posts
 
@@ -525,24 +530,10 @@ app = webapp2.WSGIApplication([('/', BlogFront),
                                UpdateComment),
                               ('/blog/([0-9]+)/deletecomment/([0-9]+)',
                                deleteComment),
-                              ('/commenterror', CommentError),
-                              ('/editDeleteError', editDeleteError),
-                              ('/likeUErr', likeUserErr),
                               ('/signup', Register),
                               ('/login', Login),
-                              ('/Lerror', likeError),
                               ('/comment/([0-9]+)', newComment),
                               ('/blog/([0-9]+)/likes', like),
                               ('/logout', Logout),
                               ('/unit3/welcome', WelcomePage),
                               ('/blog/newpost', NewPost), ], debug=True)
-
-
-
-
-
-
-
-
-
-
